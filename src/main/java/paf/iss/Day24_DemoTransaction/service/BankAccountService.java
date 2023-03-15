@@ -20,7 +20,6 @@ public class BankAccountService {
         Boolean bTransferred = false;
         Boolean bWithdrawn = false;
         Boolean bDeposited = false;
-        Boolean bCanWithdraw = false;
 
         BankAccount depositAccount = null;
         BankAccount withdrawlAccount = null;
@@ -40,10 +39,7 @@ public class BankAccountService {
 
         // Check if withdrawn account have enough money to withdraw
         if (bProceed) {
-            if (withdrawlAccount.getBalance() >= amount) {
-                bCanWithdraw = true;
-            }
-            else {
+            if (withdrawlAccount.getBalance() < amount) {
                 bProceed = false;
             }
         }
@@ -51,6 +47,12 @@ public class BankAccountService {
         if (bProceed) {
             // Perform withdrawal (requires transaction)
             bWithdrawn = bankAcctRepo.withdrawAmount(accountFrom, amount);
+
+            // Throwing error.. Simulate error by setting bWithdrawn = false
+            // bWithdrawn = false;
+            if (!bWithdrawn) {
+                throw new IllegalArgumentException("Simulate error before Withdrawl");
+            }
 
             // Perform deposit (requires transaction)
             bDeposited = bankAcctRepo.depositAmount(accountTo, amount);

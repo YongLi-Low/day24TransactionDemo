@@ -4,6 +4,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCallback;
 import org.springframework.stereotype.Repository;
@@ -40,7 +41,7 @@ public class BankAccountRepository {
 
         BankAccount bankAccount = null;
 
-        bankAccount = jdbcTemplate.queryForObject(GET_ACCOUNT_SQL, BankAccount.class, accountId);
+        bankAccount = jdbcTemplate.queryForObject(GET_ACCOUNT_SQL, BeanPropertyRowMapper.newInstance(BankAccount.class), accountId);
 
         return bankAccount;
     }
