@@ -7,8 +7,6 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import paf.iss.Day24_DemoTransaction.model.Book;
@@ -37,6 +35,7 @@ public class ReservationService {
 
         // Check for book availability by quantity
         Boolean bBooksAvailable = true;
+
         List<Book> libBooks = bookRepo.findAll();
         for (Book book: books) {
 
@@ -58,24 +57,24 @@ public class ReservationService {
                 break;
             }
         }
+        if (bBooksAvailable) {
+            // Create the reservation record (requires transaction)
+            Reservation reservation = new Reservation();
+            reservation.setFullName(reservePersonName);
+            reservation.setReservationDate(Date.valueOf(LocalDate.now()));
+            Integer reservationId = resvRepo.createReservation(reservation);
 
-        // Create the reservation record (requires transaction)
-        Reservation reservation = new Reservation();
-        reservation.setFullName(reservePersonName);
-        reservation.setReservationDate(Date.valueOf(LocalDate.now()));
-        Integer reservationId = resvRepo.createReservation(reservation);
+            // Create the reservation details record (requires transaction)
+            for (Book book: books) {
+                ReservationDetails reservationDetail = new ReservationDetails();
+                reservationDetail.setBookId(book.getId());
+                reservationDetail.setReservationId(reservationId);
 
-        // Create the reservation details record (requires transaction)
-        for (Book book: books) {
-            ReservationDetails reservationDetail = new ReservationDetails();
-            reservationDetail.setBookId(book.getId());
-            reservationDetail.setReservationId(reservationId);
-
-            resvDetailsRepo.createReservationDetails(reservationDetail);
+                resvDetailsRepo.createReservationDetails(reservationDetail);
+            }
+            
+            bReservationCompleted = true;
         }
-        
-        bReservationCompleted = true;
-
         return bReservationCompleted;
     }
 }
